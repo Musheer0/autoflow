@@ -4,6 +4,8 @@ import "./globals.css";
 import { cn } from "@/lib/utils";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ClerkProvider } from "@clerk/nextjs";
+import { TRPCReactProvider } from "@/trpc/client";
+import { Suspense } from "react";
 const inter = Inter({subsets:['latin'],variable:'--font-sans'});
 
 const geistSans = Geist({
@@ -28,15 +30,22 @@ export default function RootLayout({
 }>) {
   return (
     <html
+    suppressHydrationWarning
       lang="en"
       className={cn("h-full", "antialiased", geistSans.variable, geistMono.variable, "font-sans", inter.variable)}
     >
-      <body className="min-h-full flex flex-col">
-         <ClerkProvider>
+      <body 
+      suppressHydrationWarning
+      className="min-h-full flex flex-col">
+        <TRPCReactProvider>
+           <ClerkProvider>
           <TooltipProvider>
-            {children}
+          <Suspense>
+              {children}
+          </Suspense>
           </TooltipProvider>
          </ClerkProvider>
+        </TRPCReactProvider>
         </body>
     </html>
   );
