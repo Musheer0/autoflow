@@ -11,3 +11,110 @@ generator client {
 datasource db {
   provider = "postgresql"
 }
+
+
+
+// just to auto delete user related data when user is deleted in Clerk 
+model User {
+  clerk_id String @id
+  workflows Workflow[]
+  credentials Credential[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+enum NodeType {
+  MANUAL
+  WEBHOOK
+  HTTP
+  GMAIL
+  GROQ
+}
+
+enum NodeRole{
+  TRIGGER
+  ACTION
+}
+model Workflow {
+  id String @id @default(uuid())
+  name String
+  description String?
+  nodes Node[]
+  edges Edge[]
+  executions Execution[]
+  isTemplate Boolean @default(false)
+  template Template?
+  userId String
+  user User @relation(fields: [userId], references: [clerk_id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Edge {
+  id String @id @default(uuid())
+  sourceNodeId String
+  targetNodeId String
+  workflowId String
+  workflow Workflow @relation(fields: [workflowId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@unique([sourceNodeId, targetNodeId, workflowId]) // to ensure that there are no duplicate edges between the same nodes in the same workflow
+  @@index([workflowId])
+}
+model Node {
+  id String @id @default(uuid())
+  type NodeType
+  role NodeRole
+  name String
+  description String?
+  data Json
+  workflowId String
+  workflow Workflow @relation(fields: [workflowId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([workflowId])
+}
+
+model Credential {
+  id String @id @default(uuid())
+  name String
+  type NodeType
+  secret String
+  userId String
+  user User @relation(fields: [userId], references: [clerk_id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+
+enum ExecutionStatus {
+  PENDING
+  RUNNING
+  SUCCESS
+  FAILED
+}
+model Execution {
+  id String @id @default(uuid())
+  workflowId String
+  workflow Workflow @relation(fields: [workflowId], references: [id], onDelete: Cascade)
+  status ExecutionStatus
+  input Json
+  output Json?
+  error Json?
+  startedAt DateTime @default(now())
+  finishedAt DateTime?
+  
+  @@index([workflowId])
+}
+
+
+model Template {
+  id String @id @default(uuid())
+  name String
+  description String?
+  workflow_id String @unique
+  workflow Workflow @relation(fields: [workflow_id], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
