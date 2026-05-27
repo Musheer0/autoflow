@@ -14,6 +14,7 @@ export async function POST(req: NextRequest) {
 
     const { id } = evt.data
     const eventType = evt.type
+    console.log(evt.data)
     if (eventType==="user.created" && id){
        try {
          await prisma.user.create({

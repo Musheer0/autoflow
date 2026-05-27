@@ -1,6 +1,6 @@
 "use client"
 
-import React from "react"
+import React, { useState } from "react"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Controller, useForm } from "react-hook-form"
 import { z } from "zod"
@@ -54,15 +54,16 @@ const CreateCredentials = ({
       secret: "",
     },
   })
-  const {createCredential} = useCreateCredential()
+  const {createCredential,isPending} = useCreateCredential()
+  const [open ,setOpen] = useState(false)
   const onSubmit = async (data: FormValues) => {
     await createCredential({name:data.name,secret:data.secret,type})
-
+    setOpen(false)
     reset()
   }
 
   return (
-    <AlertDialog>
+    <AlertDialog open={open} onOpenChange={setOpen}>
       <AlertDialogTrigger asChild>
         {children}
       </AlertDialogTrigger>
@@ -137,8 +138,8 @@ const CreateCredentials = ({
             />
           </FieldGroup>
 
-          <Button className="w-full" type="submit">
-            Save Credentials
+          <Button disabled={isPending} className="w-full" type="submit">
+            {isPending ? "Saving Credentials":"Save Credentials"}
           </Button>
         </form>
       </AlertDialogContent>

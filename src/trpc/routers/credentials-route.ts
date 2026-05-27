@@ -6,6 +6,7 @@ import { NodeType } from "@/generated/prisma/enums";
 import { get } from "http";
 import redis from "@/lib/redis";
 import { credentialsListCacheKey, singleCredentialCacheKey } from "@/lib/redis-keys";
+import { Credential } from "@/generated/prisma/client";
 
 export const CredentialsRoute = createTRPCRouter({
 
