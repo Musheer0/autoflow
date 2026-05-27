@@ -1,20 +1,15 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, Inter } from "next/font/google";
+import { Host_Grotesk } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { ClerkProvider } from "@clerk/nextjs";
+import { TRPCReactProvider } from "@/trpc/client";
+import { Suspense } from "react";
+import { ThemeProvider } from "@/components/theme-provider"
 
-const inter = Inter({subsets:['latin'],variable:'--font-sans'});
+const inter = Host_Grotesk({subsets:['latin']});
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -28,11 +23,29 @@ export default function RootLayout({
 }>) {
   return (
     <html
+    suppressHydrationWarning
       lang="en"
-      className={cn("h-full", "antialiased", geistSans.variable, geistMono.variable, "font-sans", inter.variable)}
+      className={cn("h-full", "antialiased", "font-sans", inter.className)}
     >
-      <body className="min-h-full flex flex-col">
-          <TooltipProvider>{children}</TooltipProvider>
+      <body 
+      suppressHydrationWarning
+      className="min-h-full flex flex-col">
+        <TRPCReactProvider>
+           <ClerkProvider>
+          <TooltipProvider>
+          <Suspense>
+                 <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+          >
+              {children}
+              </ThemeProvider>
+          </Suspense>
+          </TooltipProvider>
+         </ClerkProvider>
+        </TRPCReactProvider>
         </body>
     </html>
   );
